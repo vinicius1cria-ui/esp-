@@ -64,7 +64,7 @@ _G.MasterSwitch = true
 local MasterBtn = Instance.new("TextButton", ContentFrame)
 MasterBtn.Size = UDim2.new(0.9, 0, 0, 35)
 MasterBtn.Position = UDim2.new(0.05, 0, 0, 0)
-MasterBtn.Text = "STATUS: ATIVADO"
+MasterBtn.Text = "FUNÇÕES: ATIVADO"
 MasterBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 MasterBtn.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", MasterBtn)

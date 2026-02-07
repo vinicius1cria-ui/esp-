@@ -20,7 +20,7 @@ Instance.new("UICorner", MainFrame)
 
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, -30, 0, 35)
-Title.Text = " HUB COMPLETO"
+Title.Text = "SHAROPIN GOD"
 Title.TextColor3 = Color3.new(1, 1, 1)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold

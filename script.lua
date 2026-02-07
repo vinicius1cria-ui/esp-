@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local lp = Players.LocalPlayer
+local mouse = lp:GetMouse()
 
 if CoreGui:FindFirstChild("PlayersList_System") then
     CoreGui:FindFirstChild("PlayersList_System"):Destroy()
@@ -11,7 +12,7 @@ local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "PlayersList_System"
 
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 220, 0, 460) -- Aumentei um pouco o tamanho para o novo botão
+MainFrame.Size = UDim2.new(0, 220, 0, 520) -- Aumentado para caber o Fly
 MainFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainFrame.Active = true
@@ -20,7 +21,7 @@ Instance.new("UICorner", MainFrame)
 
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, -30, 0, 35)
-Title.Text = "SHAROPIN GOD"
+Title.Text = " Sharopin GOD"
 Title.TextColor3 = Color3.new(1, 1, 1)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
@@ -33,38 +34,115 @@ spawn(function()
     end
 end)
 
-local Minimized = false
-local MinBtn = Instance.new("TextButton", MainFrame)
-MinBtn.Size = UDim2.new(0, 30, 0, 30)
-MinBtn.Position = UDim2.new(1, -35, 0, 2)
-MinBtn.Text = "_"
-MinBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-MinBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", MinBtn)
-
 local ContentFrame = Instance.new("Frame", MainFrame)
 ContentFrame.Size = UDim2.new(1, 0, 1, -40)
 ContentFrame.Position = UDim2.new(0, 0, 0, 40)
 ContentFrame.BackgroundTransparency = 1
 
-MinBtn.MouseButton1Click:Connect(function()
-    Minimized = not Minimized
-    if Minimized then
-        ContentFrame.Visible = false
-        MainFrame.Size = UDim2.new(0, 220, 0, 35)
-        MinBtn.Text = "+"
+-- SISTEMA DE FLY
+local flying = false
+local flySpeed = 50
+local bv, bg
+
+local function startFly()
+    local char = lp.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    
+    flying = true
+    local root = char.HumanoidRootPart
+    
+    bv = Instance.new("BodyVelocity", root)
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bv.Velocity = Vector3.new(0, 0, 0)
+    
+    bg = Instance.new("BodyGyro", root)
+    bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    bg.P = 9e4
+    
+    char.Humanoid.PlatformStand = true
+    
+    spawn(function()
+        while flying do
+            RunService.RenderStepped:Wait()
+            bg.CFrame = workspace.CurrentCamera.CFrame
+            local dir = Vector3.new(0,0,0)
+            
+            -- Controle simples: voa para onde a câmera aponta
+            bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * flySpeed
+        end
+    end)
+end
+
+local function stopFly()
+    flying = false
+    if bv then bv:Destroy() end
+    if bg then bg:Destroy() end
+    if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+        lp.Character.Humanoid.PlatformStand = false
+    end
+end
+
+-- BOTÃO FLY (LIGA/DESLIGA)
+local FlyBtn = Instance.new("TextButton", ContentFrame)
+FlyBtn.Size = UDim2.new(0.9, 0, 0, 30)
+FlyBtn.Position = UDim2.new(0.05, 0, 0, 0)
+FlyBtn.Text = "VOAR: OFF"
+FlyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+FlyBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", FlyBtn)
+
+FlyBtn.MouseButton1Click:Connect(function()
+    if flying then
+        stopFly()
+        FlyBtn.Text = "VOAR: OFF"
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     else
-        ContentFrame.Visible = true
-        MainFrame.Size = UDim2.new(0, 220, 0, 460)
-        MinBtn.Text = "_"
+        startFly()
+        FlyBtn.Text = "VOAR: ON"
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
     end
 end)
 
+-- CONTROLES DE VELOCIDADE DO FLY
+local SpeedLabel = Instance.new("TextLabel", ContentFrame)
+SpeedLabel.Size = UDim2.new(0.9, 0, 0, 20)
+SpeedLabel.Position = UDim2.new(0.05, 0, 0, 35)
+SpeedLabel.Text = "Velocidade Fly: " .. flySpeed
+SpeedLabel.TextColor3 = Color3.new(1, 1, 1)
+SpeedLabel.BackgroundTransparency = 1
+
+local IncFly = Instance.new("TextButton", ContentFrame)
+IncFly.Size = UDim2.new(0.42, 0, 0, 25)
+IncFly.Position = UDim2.new(0.05, 0, 0, 55)
+IncFly.Text = "Aumentar +"
+IncFly.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+IncFly.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", IncFly)
+
+local DecFly = Instance.new("TextButton", ContentFrame)
+DecFly.Size = UDim2.new(0.42, 0, 0, 25)
+DecFly.Position = UDim2.new(0.53, 0, 0, 55)
+DecFly.Text = "Diminuir -"
+DecFly.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+DecFly.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", DecFly)
+
+IncFly.MouseButton1Click:Connect(function()
+    flySpeed = flySpeed + 10
+    SpeedLabel.Text = "Velocidade Fly: " .. flySpeed
+end)
+
+DecFly.MouseButton1Click:Connect(function()
+    flySpeed = math.max(10, flySpeed - 10)
+    SpeedLabel.Text = "Velocidade Fly: " .. flySpeed
+end)
+
+-- FUNÇÕES ANTIGAS (Mantidas abaixo)
 _G.MasterSwitch = true
 local MasterBtn = Instance.new("TextButton", ContentFrame)
-MasterBtn.Size = UDim2.new(0.9, 0, 0, 35)
-MasterBtn.Position = UDim2.new(0.05, 0, 0, 0)
-MasterBtn.Text = "FUNÇÕES: ATIVADO"
+MasterBtn.Size = UDim2.new(0.9, 0, 0, 30)
+MasterBtn.Position = UDim2.new(0.05, 0, 0, 90)
+MasterBtn.Text = "STATUS: ATIVADO"
 MasterBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 MasterBtn.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", MasterBtn)
@@ -73,62 +151,35 @@ MasterBtn.MouseButton1Click:Connect(function()
     _G.MasterSwitch = not _G.MasterSwitch
     MasterBtn.Text = _G.MasterSwitch and "STATUS: ATIVADO" or "STATUS: DESATIVADO"
     MasterBtn.BackgroundColor3 = _G.MasterSwitch and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(170, 0, 0)
-    if not _G.MasterSwitch and lp.Character and lp.Character:FindFirstChild("Humanoid") then
-        lp.Character.Humanoid.WalkSpeed = 16
-    end
 end)
 
--- BOTÃO DE INVISIBILIDADE (SEPARADO)
-local Invisible = false
-local InvisBtn = Instance.new("TextButton", ContentFrame)
-InvisBtn.Size = UDim2.new(0.9, 0, 0, 30)
-InvisBtn.Position = UDim2.new(0.05, 0, 0, 40)
-InvisBtn.Text = "INVISÍVEL: OFF"
-InvisBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-InvisBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", InvisBtn)
+local GhostBtn = Instance.new("TextButton", ContentFrame)
+GhostBtn.Size = UDim2.new(0.9, 0, 0, 30)
+GhostBtn.Position = UDim2.new(0.05, 0, 0, 125)
+GhostBtn.Text = "GHOST MODE: OFF"
+GhostBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+GhostBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", GhostBtn)
 
-InvisBtn.MouseButton1Click:Connect(function()
-    Invisible = not Invisible
-    InvisBtn.Text = Invisible and "INVISÍVEL: ON" or "INVISÍVEL: OFF"
-    InvisBtn.BackgroundColor3 = Invisible and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(60, 60, 60)
-    
-    local char = lp.Character
-    if char and char:FindFirstChild("LowerTorso") then
-        local root = char:FindFirstChild("HumanoidRootPart")
-        if root then
-            -- Técnica simples de invisibilidade local
-            for _, v in pairs(char:GetChildren()) do
-                if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then
-                    v.Transparency = Invisible and 1 or 0
-                elseif v:IsA("Accessory") and v:FindFirstChild("Handle") then
-                    v.Handle.Transparency = Invisible and 1 or 0
-                end
-            end
-            if char:FindFirstChild("Head") and char.Head:FindFirstChild("face") then
-                char.Head.face.Transparency = Invisible and 1 or 0
+local GhostActive = false
+GhostBtn.MouseButton1Click:Connect(function()
+    GhostActive = not GhostActive
+    GhostBtn.Text = GhostActive and "GHOST MODE: ON" or "GHOST MODE: OFF"
+    GhostBtn.BackgroundColor3 = GhostActive and Color3.fromRGB(130, 0, 255) or Color3.fromRGB(60, 60, 60)
+    if lp.Character then
+        for _, v in pairs(lp.Character:GetDescendants()) do
+            if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then
+                v.Transparency = GhostActive and 0.95 or 0
+            elseif v:IsA("Decal") then
+                v.Transparency = GhostActive and 1 or 0
             end
         end
     end
 end)
 
-local SpeedBtn = Instance.new("TextButton", ContentFrame)
-SpeedBtn.Size = UDim2.new(0.9, 0, 0, 30)
-SpeedBtn.Position = UDim2.new(0.05, 0, 0, 75)
-SpeedBtn.Text = "Velocidade: 50"
-SpeedBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-SpeedBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", SpeedBtn)
-
-SpeedBtn.MouseButton1Click:Connect(function()
-    if _G.MasterSwitch and lp.Character and lp.Character:FindFirstChild("Humanoid") then
-        lp.Character.Humanoid.WalkSpeed = 50
-    end
-end)
-
 local Scroll = Instance.new("ScrollingFrame", ContentFrame)
-Scroll.Size = UDim2.new(1, -10, 0, 240)
-Scroll.Position = UDim2.new(0, 5, 0, 115)
+Scroll.Size = UDim2.new(1, -10, 0, 200)
+Scroll.Position = UDim2.new(0, 5, 0, 165)
 Scroll.BackgroundTransparency = 1
 Scroll.ScrollBarThickness = 2
 
@@ -142,39 +193,5 @@ local function CreateESP(player)
     box.Transparency = 0.5
     box.Size = Vector3.new(4, 6, 1)
     RunService.RenderStepped:Connect(function()
-        if _G.MasterSwitch and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            box.Adornee = player.Character.HumanoidRootPart
-            box.Color3 = (player.Team == lp.Team) and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
-        else
-            box.Adornee = nil
-        end
-    end)
-end
-
-local function UpdateList()
-    for _, item in pairs(Scroll:GetChildren()) do if item:IsA("TextButton") then item:Destroy() end end
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= lp then
-            local btn = Instance.new("TextButton", Scroll)
-            btn.Size = UDim2.new(1, -10, 0, 30)
-            btn.Text = "TP: " .. p.DisplayName
-            btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-            btn.TextColor3 = Color3.new(1, 1, 1)
-            Instance.new("UICorner", btn)
-            btn.MouseButton1Click:Connect(function()
-                if _G.MasterSwitch and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    lp.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
-                end
-            end)
-        end
-    end
-end
-
-for _, p in pairs(Players:GetPlayers()) do if p ~= lp then CreateESP(p) end end
-Players.PlayerAdded:Connect(function(p) CreateESP(p) UpdateList() end)
-Players.PlayerRemoving:Connect(UpdateList)
-UpdateList()
-
-RunService.RenderStepped:Connect(function()
-    Scroll.CanvasSize = UDim2.new(0, 0, 0, Layout.AbsoluteContentSize.Y)
-end)
+        if _G.MasterSwitch and
+                

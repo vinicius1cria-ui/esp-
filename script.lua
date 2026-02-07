@@ -19,18 +19,53 @@ MainFrame.Draggable = true
 Instance.new("UICorner", MainFrame)
 
 local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1, 0, 0, 35)
-Title.Text = "VINI XIT"
+Title.Size = UDim2.new(1, -30, 0, 35)
+Title.Text = " HUB COMPLETO"
 Title.TextColor3 = Color3.new(1, 1, 1)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- VARIÁVEL DE CONTROLE MESTRE
+-- EFEITO RGB NO TÍTULO
+spawn(function()
+    while wait() do
+        local hue = tick() % 5 / 5
+        Title.TextColor3 = Color3.fromHSV(hue, 1, 1)
+    end
+end)
+
+local Minimized = false
+local MinBtn = Instance.new("TextButton", MainFrame)
+MinBtn.Size = UDim2.new(0, 30, 0, 30)
+MinBtn.Position = UDim2.new(1, -35, 0, 2)
+MinBtn.Text = "_"
+MinBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MinBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", MinBtn)
+
+local ContentFrame = Instance.new("Frame", MainFrame)
+ContentFrame.Size = UDim2.new(1, 0, 1, -40)
+ContentFrame.Position = UDim2.new(0, 0, 0, 40)
+ContentFrame.BackgroundTransparency = 1
+
+MinBtn.MouseButton1Click:Connect(function()
+    Minimized = not Minimized
+    if Minimized then
+        ContentFrame.Visible = false
+        MainFrame.Size = UDim2.new(0, 220, 0, 35)
+        MinBtn.Text = "+"
+    else
+        ContentFrame.Visible = true
+        MainFrame.Size = UDim2.new(0, 220, 0, 420)
+        MinBtn.Text = "_"
+    end
+end)
+
 _G.MasterSwitch = true
 
-local MasterBtn = Instance.new("TextButton", MainFrame)
+local MasterBtn = Instance.new("TextButton", ContentFrame)
 MasterBtn.Size = UDim2.new(0.9, 0, 0, 35)
-MasterBtn.Position = UDim2.new(0.05, 0, 0, 40)
+MasterBtn.Position = UDim2.new(0.05, 0, 0, 0)
 MasterBtn.Text = "STATUS: ATIVADO"
 MasterBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
 MasterBtn.TextColor3 = Color3.new(1, 1, 1)
@@ -44,16 +79,15 @@ MasterBtn.MouseButton1Click:Connect(function()
     else
         MasterBtn.Text = "STATUS: DESATIVADO"
         MasterBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-        -- Resetar velocidade ao desativar
         if lp.Character and lp.Character:FindFirstChild("Humanoid") then
             lp.Character.Humanoid.WalkSpeed = 16
         end
     end
 end)
 
-local SpeedBtn = Instance.new("TextButton", MainFrame)
+local SpeedBtn = Instance.new("TextButton", ContentFrame)
 SpeedBtn.Size = UDim2.new(0.9, 0, 0, 30)
-SpeedBtn.Position = UDim2.new(0.05, 0, 0, 80)
+SpeedBtn.Position = UDim2.new(0.05, 0, 0, 40)
 SpeedBtn.Text = "Velocidade: 50"
 SpeedBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 SpeedBtn.TextColor3 = Color3.new(1, 1, 1)
@@ -65,9 +99,9 @@ SpeedBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-local Scroll = Instance.new("ScrollingFrame", MainFrame)
+local Scroll = Instance.new("ScrollingFrame", ContentFrame)
 Scroll.Size = UDim2.new(1, -10, 0, 240)
-Scroll.Position = UDim2.new(0, 5, 0, 120)
+Scroll.Position = UDim2.new(0, 5, 0, 80)
 Scroll.BackgroundTransparency = 1
 Scroll.ScrollBarThickness = 2
 

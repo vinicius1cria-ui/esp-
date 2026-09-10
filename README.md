@@ -1,62 +1,47 @@
-local Players = game:GetService("Players")
-local lp = Players.LocalPlayer
-local RunService = game:GetService("RunService")
+-- NoClip + ESP Script
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
 
--- CONFIGURAÇÃO DA VELOCIDADE
-_G.SpeedEnabled = false
-_G.SpeedValue = 50
+-- NoClip
+local noclipEnabled = true
+local function noclip()
+    if noclipEnabled then
+        for _, part in pairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end
 
--- LIMPEZA
-if lp.PlayerGui:FindFirstChild("KingSpeed") then lp.PlayerGui.KingSpeed:Destroy() end
-
--- UI BASE
-local sg = Instance.new("ScreenGui", lp.PlayerGui)
-sg.Name = "KingSpeed"
-sg.ResetOnSpawn = false
-
-local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 200, 0, 150)
-main.Position = UDim2.new(0.2, 0, 0.2, 0)
-main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-main.Active = true
-main.Draggable = true
-
--- BOTÃO MINIMIZAR
-local min = Instance.new("TextButton", main)
-min.Size = UDim2.new(0, 40, 0, 30)
-min.Text = "-"
-min.MouseButton1Click:Connect(function()
-    main.Visible = false
-    -- Criar botão de abrir se fechar
+game:GetService("RunService").Stepped:Connect(function()
+    noclip()
 end)
 
--- TOGGLE SPEED
-local toggle = Instance.new("TextButton", main)
-toggle.Size = UDim2.new(0.8, 0, 0, 30)
-toggle.Position = UDim2.new(0.1, 0, 0.2, 0)
-toggle.Text = "SPEED: OFF"
-toggle.MouseButton1Click:Connect(function()
-    _G.SpeedEnabled = not _G.SpeedEnabled
-    toggle.Text = _G.SpeedEnabled and "SPEED: ON" or "SPEED: OFF"
-end)
+-- ESP
+local espEnabled = true
+local function createESP(target)
+    if not target:FindFirstChild("ESPBox") then
+        local box = Instance.new("BoxHandleAdornment")
+        box.Name = "ESPBox"
+        box.Size = target.Size + Vector3.new(1, 1, 1)
+        box.Adornee = target
+        box.AlwaysOnTop = true
+        box.ZIndex = 5
+        box.Color3 = Color3.new(1, 0, 0)
+        box.Transparency = 0.5
+        box.Parent = target
+    end
+end
 
--- AJUSTAR VELOCIDADE
-local plus = Instance.new("TextButton", main)
-plus.Size = UDim2.new(0, 40, 0, 30)
-plus.Position = UDim2.new(0.6, 0, 0.6, 0)
-plus.Text = "+"
-plus.MouseButton1Click:Connect(function() _G.SpeedValue = _G.SpeedValue + 5 end)
-
-local minus = Instance.new("TextButton", main)
-minus.Size = UDim2.new(0, 40, 0, 30)
-minus.Position = UDim2.new(0.1, 0, 0.6, 0)
-minus.Text = "-"
-minus.MouseButton1Click:Connect(function() _G.SpeedValue = _G.SpeedValue - 5 end)
-
--- LÓGICA
-RunService.Stepped:Connect(function()
-    if _G.SpeedEnabled and lp.Character and lp.Character:FindFirstChild("Humanoid") then
-        lp.Character.Humanoid.WalkSpeed = _G.SpeedValue
+game:GetService("RunService").RenderStepped:Connect(function()
+    if espEnabled then
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr ~= player and plr.Character then
+                createESP(plr.Character)
+            end
+        end
     end
 end)
-
